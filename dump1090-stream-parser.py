@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # encoding: utf-8
 
 import socket
@@ -103,11 +102,11 @@ def main():
 		try:
 			s = connect_to_socket(args.location, args.port)
 			count_failed_connection_attempts = 1
-			print "Connected to dump1090 broadcast"
+			print("Connected to dump1090 broadcast")
 			break
 		except socket.error:
 			count_failed_connection_attempts += 1
-			print "Cannot connect to dump1090 broadcast. Making attempt %s." % (count_failed_connection_attempts)
+			print("Cannot connect to dump1090 broadcast. Making attempt %s." % (count_failed_connection_attempts))
 			time.sleep(args.connect_attempt_delay)
 	else:
 		quit()
@@ -127,13 +126,14 @@ def main():
 			try:
 				message = ""
 				message = s.recv(args.buffer_size)
-				data_str += message.strip("\n")
+				#data_str += message.strip("\n")
+				data_str += message.decode('ascii')
 			except socket.error:
 				# this happens if there is no connection and is delt with below
 				pass
 
 			if len(message) == 0:
-				print ts, "No broadcast received. Attempting to reconnect"
+				print(ts, "No broadcast received. Attempting to reconnect")
 				time.sleep(args.connect_attempt_delay)
 				s.close()
 
@@ -141,11 +141,11 @@ def main():
 					try:
 						s = connect_to_socket(args.location, args.port)
 						count_failed_connection_attempts = 1
-						print "Reconnected!"
+						print("Reconnected!")
 						break
 					except socket.error:
 						count_failed_connection_attempts += 1
-						print "The attempt failed. Making attempt %s." % (count_failed_connection_attempts)
+						print("The attempt failed. Making attempt %s." % (count_failed_connection_attempts))
 						time.sleep(args.connect_attempt_delay)
 				else:
 					quit()
@@ -204,16 +204,16 @@ def main():
 						if count_since_commit % args.batch_size == 0:
 							conn.commit()
 							if cur_time != last_time:
-								print "averging %s rows per second, currently %s rows per second" % (float(count_total) / (cur_time - start_time).total_seconds(),float(count_since_commit) / (cur_time - last_time).total_seconds())
+								print("averging %s rows per second, currently %s rows per second" % (float(count_total) / (cur_time - start_time).total_seconds(),float(count_since_commit) / (cur_time - last_time).total_seconds()))
 							else:
-								print "averging %s rows per second" % (float(count_total) / (cur_time - start_time).total_seconds(),)
+								print("averging %s rows per second" % (float(count_total) / (cur_time - start_time).total_seconds(),))
 							if count_since_commit > args.batch_size:
-								print ts, "All caught up, %s rows, successfully written to database" % (count_since_commit)
+								print(ts, "All caught up, %s rows, successfully written to database" % (count_since_commit))
 							count_since_commit = 0
 							last_time = cur_time
 
 					except sqlite3.OperationalError:
-						print ts, "Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,)
+						print(ts, "Could not write to database, will try to insert %s rows on next commit" % (count_since_commit + args.batch_size,))
 
 
 					# since everything was valid we reset the stream message
@@ -224,15 +224,15 @@ def main():
 					continue
 
 	except KeyboardInterrupt:
-		print "\n%s Closing connection" % (ts,)
+		print("\n%s Closing connection" % (ts,))
 		s.close()
 
 		conn.commit()
 		conn.close()
-		print ts, "%s squitters added to your database" % (count_total,)
+		print(ts, "%s squitters added to your database" % (count_total,))
 
 	except sqlite3.ProgrammingError:
-		print "Error with ", line
+		print("Error with ", line)
 		quit()
 
 def connect_to_socket(loc,port):
